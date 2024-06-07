@@ -82,6 +82,19 @@ class UserController {
     }
 
     
+
+    public function Borrar() {
+        if (isset($_GET['id'])) {
+            $id = $_GET['id'];
+            if ($this->user->deleteRecipe($id)) {
+                echo 'success';
+            } else {
+                echo 'failure';
+            }
+        }
+    }
+
+
 }
     
 

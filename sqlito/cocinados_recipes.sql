@@ -36,6 +36,7 @@ CREATE TABLE `recipes` (
   `ingrediente_especial` varchar(255) DEFAULT NULL,
   `image` varchar(255) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL,
+  `username` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
