@@ -21,7 +21,7 @@ class producto
 		}
 	}
 
-	public function Listar()
+	public function ListarProducto()
 	{
 		try
 		{
@@ -92,10 +92,8 @@ class producto
 
 	public function Registrar(producto $data)
 	{
-		try
-		{
-		$sql = "INSERT INTO producto (idProducto,nit,nomprod,precioU,descrip)
-		        VALUES (?, ?, ?, ?,?)";
+		try{
+		$sql = "INSERT INTO producto (idProducto,nit,nomprod,precioU,descrip) VALUES (?, ?, ?, ?,?)";
 
 		$this->pdo->prepare($sql)
 		     ->execute(
