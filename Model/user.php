@@ -1,82 +1,81 @@
 <?php
-require_once 'model/user.php';
 
-class UserController {
-    private $user;
+class User {
+    private $pdo;
+    //Atributos del objeto user
+    public $id;
+    public $username;
+    public $nombre;
+    public $apellidos;
+    public $correo_electronico;
+    public $contrasena;
+ 
 
-    public function __construct() {
-        $this->user = new User();
-    }
 
-    public function index() {
-        require_once 'view/header.php';
-        require_once 'view/formUser.php';
-        require_once 'view/footer.php';
-    }
-
-    public function actionLogin() {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $correo_electronico = $_POST['correo_electronico'];
-            $contrasena = $_POST['contrasena'];
-            $user = $this->user->login($correo_electronico, $contrasena);
-            if ($user) {
-                session_start();
-                $_SESSION['username'] = $user['username'];
-                header('Location: index.php?');
-            } else {
-                echo "Invalid credentials";
-            }
-        } else {
-            require_once 'view/header.php';
-            require 'view/formUser.php';
-            require_once 'view/footer.php';
+    public function __CONSTRUCT()
+    {
+        try {
+            $this->pdo = Database::Conectar();
+        } catch (Exception $e) {
+            die($e->getMessage());
         }
     }
 
-    public function logout() {
-        session_start();
-        session_destroy();
-        header('Location: index.php?');
+
+    public function register($username, $nombre, $apellidos, $correo_electronico, $contrasena) {
+        $passwordHash = password_hash($contrasena, PASSWORD_BCRYPT);
+        $sql = "INSERT INTO usuarios (username, nombre, apellidos, correo_electronico, contrasena) VALUES (:username, :nombre, :apellidos, :correo_electronico, :contrasena)";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':username', $username);
+        $stmt->bindParam(':nombre', $nombre);
+        $stmt->bindParam(':apellidos', $apellidos);
+        $stmt->bindParam(':correo_electronico', $correo_electronico);
+        $stmt->bindParam(':contrasena', $passwordHash);
+        return $stmt->execute();
     }
 
-    public function register2() {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $username = $_POST['username'];
-            $nombre = $_POST['nombre'];
-            $apellidos = $_POST['apellidos'];
-            $correo_electronico = $_POST['correo_electronico'];
-            $contrasena = $_POST['contrasena'];
 
-            if ($this->user->register($username, $nombre, $apellidos, $correo_electronico, $contrasena)) {
-                $user = $this->user->login($correo_electronico, $contrasena);
-                if ($user) {
-                    session_start();
-                    $_SESSION['user_id'] = $user['user_id'];
-                    header('Location: index.php?action=home');
-                }
-            } else {
-                echo "Registration failed";
-            }
-        } else {
-            require 'view/register.php';
+    public function login($correo_electronico, $contrasena) {
+        $sql = "SELECT * FROM usuarios WHERE correo_electronico = :correo_electronico";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':correo_electronico', $correo_electronico);
+        $stmt->execute();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($user && password_verify($contrasena, $user['contrasena'])) {
+            return $user;
+        }
+        return false;
+    }
+
+
+
+    public function TotaRecetas(){
+        try {
+            $stm = $this->pdo->prepare("SELECT name, description,id FROM recipes;");
+            $stm->execute();
+            return $stm->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            die($e->getMessage());
         }
     }
 
-    public function adminPanel() {
-        $recipes = $this->user->TotaRecetas();
-        require_once 'view/header.php';
-        require_once 'view/showRecipes.php';
-        require_once 'view/footer.php';
-    }
 
-    public function Borrar() {
-        if (isset($_GET['id'])) {
-            $id = $_GET['id'];
-            if ($this->user->deleteRecipe($id)) {
-                echo 'success';
-            } else {
-                echo 'failure';
-            }
+   
+    
+    public function BorrarRecetas($id){
+        try {
+            $stm = $this->pdo->prepare("DELETE FROM `cocinados`.`recipes` WHERE (`id` = '$id');");
+            $stm->execute();
+            $stm2 = $this->pdo->prepare("DELETE FROM `cocinados`.`pasos` WHERE (`receta_id` = '$id');");
+            $stm2->execute();
+            $stm3 = $this->pdo->prepare("DELETE FROM `cocinados`.`ingredientes` WHERE (`receta_id` = '$id');");
+            $stm3->execute();
+
+        } catch (Exception $e) {
+            die($e->getMessage());
         }
     }
+
+
+
 }

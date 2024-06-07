@@ -82,17 +82,22 @@ class UserController {
     }
 
     
+    public function BorrarRecetas() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $id = $_POST['id'];
+            //echo $id;
+            $user = $this->user->BorrarRecetas($id);
+            header('Location: index.php?c=User&a=adminPanel');
 
-    public function Borrar() {
-        if (isset($_GET['id'])) {
-            $id = $_GET['id'];
-            if ($this->user->deleteRecipe($id)) {
-                echo 'success';
-            } else {
-                echo 'failure';
-            }
         }
+       
+       
     }
+
+
+
+
+
 
 
 }
